@@ -116,6 +116,10 @@ WF.uploadQueue = function (url, queueEl, hooks) {
       job.bar.style.width = "100%";
       job.status.className = "status ok";
       job.status.textContent = "Done";
+      if (hooks && hooks.clearDone) {
+        const row = job.status.parentElement;
+        setTimeout(() => row.remove(), hooks.clearDone);
+      }
     } catch (e) {
       job.status.className = "status err";
       job.status.textContent = e.message + " ";

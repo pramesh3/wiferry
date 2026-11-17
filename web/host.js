@@ -25,7 +25,8 @@
   WF.watch("received", $("received"), { canDelete: true, emptyText: "Files sent from your phone appear here." });
   WF.watch("shared", $("shared"), { canDelete: true, emptyText: "Nothing shared yet." });
 
-  const add = WF.uploadQueue("/api/share", $("queue"));
+  // The shared list below is the source of truth; drop progress rows once done.
+  const add = WF.uploadQueue("/api/share", $("queue"), { clearDone: 3000 });
   const drop = $("drop");
   drop.addEventListener("click", () => $("pick").click());
   $("pick").addEventListener("change", () => { add(Array.from($("pick").files)); $("pick").value = ""; });
