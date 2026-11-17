@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>WiFerry</title>
+  <link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+<main>
+  <header><h1>WiFerry</h1><span>Connected to PC</span></header>
+
+  <div class="grid">
+    <section class="card">
+      <h2>Send to PC</h2>
+      <input id="pick" type="file" multiple>
+      <button class="primary" id="send">Send files</button>
+      <div id="busy" class="warn" hidden>Keep this screen open until sending finishes.</div>
+      <div id="queue" class="queue"></div>
+      <details>
+        <summary>Tips for iPhone</summary>
+        <ul>
+          <li><b>Photo Library</b> may convert HEIC photos to JPEG. Use <b>Choose File</b> (Files app) to keep originals.</li>
+          <li>If "Optimize iPhone Storage" is on, some photos live in iCloud only and can't be sent offline.</li>
+          <li>Don't lock the screen or switch apps while sending.</li>
+        </ul>
+      </details>
+    </section>
+
+    <section class="card">
+      <div class="row spread">
+        <h2>From PC</h2>
+        <a class="btn small" href="/api/zip/shared" download>Download all</a>
+      </div>
+      <ul id="shared" class="files"></ul>
+      <p class="muted">On iPhone, downloads go to Files → Downloads. To add a photo to Photos, open it there and tap Share → Save Image.</p>
+    </section>
+  </div>
+</main>
+<script src="/static/common.js"></script>
+<script src="/static/client.js"></script>
+</body>
+</html>

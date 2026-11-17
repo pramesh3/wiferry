@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>WiFerry</title>
+  <link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+<main>
+  <header><h1>WiFerry</h1><span id="hostname"></span></header>
+
+  <div class="grid two">
+    <section class="card">
+      <h2>Connect a device</h2>
+      <p class="muted">Join the same Wi-Fi or hotspot, then scan with the iPhone camera.</p>
+      <div id="noip" class="warn" hidden>No network found. Connect this PC to Wi-Fi or a hotspot, then reload.</div>
+      <img id="qr" class="qr" alt="QR code to connect">
+      <div class="row"><label for="ip" class="muted">Network</label><select id="ip"></select></div>
+      <p id="url" class="url"></p>
+      <p class="muted">Anyone with this code can send you files and see what you share. A new code is made each time WiFerry starts.</p>
+    </section>
+
+    <div class="grid">
+      <section class="card">
+        <div class="row spread">
+          <h2>Received</h2>
+          <a class="btn small" href="/api/zip/received" download>Download all</a>
+        </div>
+        <ul id="received" class="files"></ul>
+        <p class="muted">Saved in <span id="dir"></span></p>
+      </section>
+
+      <section class="card">
+        <h2>Share to devices</h2>
+        <input id="pick" type="file" multiple>
+        <div id="drop" class="drop">Drop files here or click to choose</div>
+        <div id="queue" class="queue"></div>
+        <ul id="shared" class="files"></ul>
+      </section>
+    </div>
+  </div>
+</main>
+<script src="/static/common.js"></script>
+<script src="/static/host.js"></script>
+</body>
+</html>
