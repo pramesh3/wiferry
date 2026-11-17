@@ -59,7 +59,7 @@ Native iOS/Android apps, HTTPS, user accounts, transfer history, folder sync, in
 
 ### 3.2 HTTP API
 
-All routes except `/healthz` require auth.
+All routes except `/healthz` require auth. Requests from loopback (the host's own browser) are trusted without a token; all other requests need a valid token cookie. Routes marked "loopback only" reject non-loopback requests even when they carry a valid token.
 
 | Method | Path | Purpose |
 |---|---|---|
