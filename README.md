@@ -35,7 +35,10 @@ WiFerry needs no internet, only a shared network:
 - **Keep originals (HEIC):** Photo Library may convert photos to JPEG. To keep originals, first save them to Files (Photos → Share → Save to Files), then send with **Choose File**.
 - **"Optimize iPhone Storage":** photos stored only in iCloud can't be sent offline. Open them in Photos while online first.
 - **Keep the screen on** while sending; Safari pauses uploads when locked. Failed files show a **Retry** button.
-- **Saving to Photos:** downloads land in Files → Downloads. Open the image and tap Share → Save Image.
+- **Finding downloads:** in Safari tap **AA** → **Downloads**, or open Files → Downloads.
+- **Keep downloads on the phone, not iCloud:** Settings → Apps → Safari → Downloads → **On My iPhone**.
+- **Download all** saves a dated zip (`WiFerry-2026-11-17_15-42.zip`). Tap it once in Files to get a folder with all the files.
+- **Saving to Photos:** open the image in Files and tap Share → Save Image.
 
 ## Options
 

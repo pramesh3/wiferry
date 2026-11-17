@@ -14,6 +14,7 @@ import (
 	"path"
 	"strings"
 	"syscall"
+	"time"
 
 	"wiferry/internal/auth"
 	"wiferry/internal/netinfo"
@@ -250,7 +251,9 @@ func (s *srv) zip(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Content-Type", "application/zip")
-	attachment(w, "WiFerry-"+string(b)+".zip")
+	// Dated name: unzipping on iPhone/Windows/macOS creates a folder with this
+	// name, and repeated downloads never overwrite each other.
+	attachment(w, "WiFerry-"+time.Now().Format("2006-01-02_15-04")+".zip")
 	if err := s.Store.WriteZip(b, w); err != nil {
 		log.Printf("zip %s: %v", b, err)
 	}

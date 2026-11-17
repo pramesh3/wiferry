@@ -10,6 +10,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"testing"
 
@@ -156,6 +157,15 @@ func TestHostSharesClientDownloads(t *testing.T) {
 	zr, err := zip.NewReader(bytes.NewReader(rec.Body.Bytes()), int64(rec.Body.Len()))
 	if err != nil || len(zr.File) != 1 || zr.File[0].Name != "doc.pdf" {
 		t.Fatalf("zip err=%v", err)
+	}
+}
+
+func TestZipNameHasDateStamp(t *testing.T) {
+	f := setup(t)
+	rec := f.do(clientReq("GET", "/api/zip/shared", nil))
+	cd := rec.Header().Get("Content-Disposition")
+	if !regexp.MustCompile(`^attachment; filename=WiFerry-\d{4}-\d{2}-\d{2}_\d{2}-\d{2}\.zip$`).MatchString(cd) {
+		t.Fatalf("content-disposition = %q", cd)
 	}
 }
 
