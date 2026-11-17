@@ -20,6 +20,7 @@ Works with iPhone first, but any device with a browser (Android, another PC) wor
 4. Scan the QR code with the iPhone camera and tap the link.
 5. **Send files**: tap the button and choose Photo Library, Take Photo, or Choose File.
    **Receive files**: drop files on the PC page under "Share to devices", then tap them on the phone.
+   Once a phone has fully downloaded a file, it is removed from the shared list (the copy in `~/WiFerry/Shared` is deleted; your originals are untouched).
 
 Received files go to `~/WiFerry/Received` (Windows: `C:\Users\<you>\WiFerry\Received`).
 

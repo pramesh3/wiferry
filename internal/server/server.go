@@ -240,9 +240,49 @@ func (s *srv) download(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	defer f.Close()
 	attachment(w, name)
-	http.ServeContent(w, r, name, fi.ModTime(), f)
+	cw := &countingWriter{ResponseWriter: w, status: http.StatusOK}
+	http.ServeContent(cw, r, name, fi.ModTime(), f)
+	f.Close() // must close before delete (Windows)
+
+	if consumesShared(r, b) && r.Method == http.MethodGet && cw.status == http.StatusOK && cw.n == fi.Size() {
+		s.removeDelivered(b, []string{name}, r)
+	}
+}
+
+// consumesShared reports whether a completed download should remove the file:
+// only when another device (not this PC) takes it from the Shared box.
+func consumesShared(r *http.Request, b store.Box) bool {
+	return b == store.Shared && !auth.IsLoopback(r)
+}
+
+func (s *srv) removeDelivered(b store.Box, names []string, r *http.Request) {
+	for _, n := range names {
+		if err := s.Store.Delete(b, n); err != nil && !errors.Is(err, os.ErrNotExist) {
+			log.Printf("remove delivered %s: %v", n, err)
+			continue
+		}
+		log.Printf("delivered %s to %s, removed from Shared", n, r.RemoteAddr)
+	}
+}
+
+// countingWriter records the status code and body bytes written so we can
+// tell a complete download from a partial, cached or failed one.
+type countingWriter struct {
+	http.ResponseWriter
+	status int
+	n      int64
+}
+
+func (c *countingWriter) WriteHeader(code int) {
+	c.status = code
+	c.ResponseWriter.WriteHeader(code)
+}
+
+func (c *countingWriter) Write(p []byte) (int, error) {
+	n, err := c.ResponseWriter.Write(p)
+	c.n += int64(n)
+	return n, err
 }
 
 func (s *srv) zip(w http.ResponseWriter, r *http.Request) {
@@ -254,8 +294,13 @@ func (s *srv) zip(w http.ResponseWriter, r *http.Request) {
 	// Dated name: unzipping on iPhone/Windows/macOS creates a folder with this
 	// name, and repeated downloads never overwrite each other.
 	attachment(w, "WiFerry-"+time.Now().Format("2006-01-02_15-04")+".zip")
-	if err := s.Store.WriteZip(b, w); err != nil {
-		log.Printf("zip %s: %v", b, err)
+	names, err := s.Store.WriteZip(b, w)
+	if err != nil {
+		log.Printf("zip %s: %v", b, err) // incomplete: keep files
+		return
+	}
+	if consumesShared(r, b) {
+		s.removeDelivered(b, names, r)
 	}
 }
 

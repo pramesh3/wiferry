@@ -161,19 +161,25 @@ func (s *Store) Delete(b Box, name string) error {
 }
 
 // WriteZip streams all files in a box as an uncompressed zip archive
-// (photos and videos are already compressed).
-func (s *Store) WriteZip(b Box, w io.Writer) error {
+// (photos and videos are already compressed). It returns the names written
+// so callers can act on exactly those files once the transfer succeeds.
+func (s *Store) WriteZip(b Box, w io.Writer) ([]string, error) {
 	files, err := s.List(b)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	zw := zip.NewWriter(w)
+	names := make([]string, 0, len(files))
 	for _, fi := range files {
 		if err := addToZip(zw, filepath.Join(s.Dir(b), fi.Name), fi); err != nil {
-			return err
+			return nil, err
 		}
+		names = append(names, fi.Name)
 	}
-	return zw.Close()
+	if err := zw.Close(); err != nil {
+		return nil, err
+	}
+	return names, nil
 }
 
 func addToZip(zw *zip.Writer, p string, fi FileInfo) error {

@@ -152,11 +152,70 @@ func TestHostSharesClientDownloads(t *testing.T) {
 	if cd := rec.Header().Get("Content-Disposition"); !strings.HasPrefix(cd, "attachment") {
 		t.Fatalf("content-disposition = %q", cd)
 	}
+}
 
-	rec = f.do(clientReq("GET", "/api/zip/shared", nil))
+func sharedNames(f *fixture) []string {
+	list, _ := f.store.List(store.Shared)
+	names := []string{}
+	for _, fi := range list {
+		names = append(names, fi.Name)
+	}
+	return names
+}
+
+func TestClientDownloadDeletesSharedFile(t *testing.T) {
+	f := setup(t)
+	f.store.Save(store.Shared, "a.jpg", strings.NewReader("AAAA"))
+	f.store.Save(store.Shared, "b.jpg", strings.NewReader("BBBB"))
+	rec := f.do(clientReq("GET", "/api/download/shared/a.jpg", nil))
+	if rec.Code != 200 || rec.Body.String() != "AAAA" {
+		t.Fatalf("download = %d %q", rec.Code, rec.Body)
+	}
+	if got := sharedNames(f); len(got) != 1 || got[0] != "b.jpg" {
+		t.Fatalf("shared after download = %v", got)
+	}
+}
+
+func TestDownloadsThatKeepFile(t *testing.T) {
+	cases := map[string]func() *http.Request{
+		"host download": func() *http.Request { return hostReq("GET", "/api/download/shared/a.jpg", nil) },
+		"partial range": func() *http.Request {
+			r := clientReq("GET", "/api/download/shared/a.jpg", nil)
+			r.Header.Set("Range", "bytes=0-1")
+			return r
+		},
+		"HEAD": func() *http.Request { return clientReq("HEAD", "/api/download/shared/a.jpg", nil) },
+	}
+	for name, mk := range cases {
+		f := setup(t)
+		f.store.Save(store.Shared, "a.jpg", strings.NewReader("AAAA"))
+		f.do(mk())
+		if got := sharedNames(f); len(got) != 1 {
+			t.Errorf("%s: shared = %v, want file kept", name, got)
+		}
+	}
+}
+
+func TestClientZipDeletesSharedFiles(t *testing.T) {
+	f := setup(t)
+	f.store.Save(store.Shared, "a.jpg", strings.NewReader("AAAA"))
+	f.store.Save(store.Shared, "b.jpg", strings.NewReader("BBBB"))
+	rec := f.do(clientReq("GET", "/api/zip/shared", nil))
 	zr, err := zip.NewReader(bytes.NewReader(rec.Body.Bytes()), int64(rec.Body.Len()))
-	if err != nil || len(zr.File) != 1 || zr.File[0].Name != "doc.pdf" {
+	if err != nil || len(zr.File) != 2 {
 		t.Fatalf("zip err=%v", err)
+	}
+	if got := sharedNames(f); len(got) != 0 {
+		t.Fatalf("shared after zip = %v", got)
+	}
+}
+
+func TestHostZipKeepsFiles(t *testing.T) {
+	f := setup(t)
+	f.store.Save(store.Shared, "a.jpg", strings.NewReader("AAAA"))
+	f.do(hostReq("GET", "/api/zip/shared", nil))
+	if got := sharedNames(f); len(got) != 1 {
+		t.Fatalf("shared after host zip = %v", got)
 	}
 }
 

@@ -140,8 +140,9 @@ func TestWriteZip(t *testing.T) {
 	s.Save(Shared, "a.txt", strings.NewReader("AAA"))
 	s.Save(Shared, "b.txt", strings.NewReader("BB"))
 	var buf bytes.Buffer
-	if err := s.WriteZip(Shared, &buf); err != nil {
-		t.Fatal(err)
+	names, err := s.WriteZip(Shared, &buf)
+	if err != nil || len(names) != 2 {
+		t.Fatalf("names=%v err=%v", names, err)
 	}
 	zr, err := zip.NewReader(bytes.NewReader(buf.Bytes()), int64(buf.Len()))
 	if err != nil {
