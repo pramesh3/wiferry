@@ -6,7 +6,8 @@
 
 <p align="center">
   <b>AirDrop-style file transfer between your iPhone and a Windows or Linux PC.</b><br>
-  No app on the phone · No internet · One small file on the PC
+  No app on the phone · No internet · One small file on the PC<br>
+  <a href="https://pramesh3.github.io/wiferry/">pramesh3.github.io/wiferry</a>
 </p>
 
 <p align="center">
