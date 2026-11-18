@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"wiferry/internal/auth"
+	"wiferry/internal/install"
 	"wiferry/internal/netinfo"
 	"wiferry/internal/store"
 )
@@ -29,14 +30,22 @@ type fixture struct {
 
 func setup(t *testing.T) *fixture {
 	t.Helper()
+	return setupWith(t, Config{})
+}
+
+func setupWith(t *testing.T, cfg Config) *fixture {
+	t.Helper()
 	st, err := store.New(t.TempDir())
 	if err != nil {
 		t.Fatal(err)
 	}
 	h := New(Config{
-		Auth:  auth.NewWithToken(token),
-		Store: st,
-		Port:  8642,
+		OnQuit:    cfg.OnQuit,
+		Install:   cfg.Install,
+		Installed: cfg.Installed,
+		Auth:      auth.NewWithToken(token),
+		Store:     st,
+		Port:      8642,
 		// Session started a minute ago; anything older is from a past run.
 		SessionStart: time.Now().Add(-time.Minute),
 		ListIPs: func() ([]netinfo.Addr, error) {
@@ -423,5 +432,84 @@ func TestSentUnknownIDsAreNotPending(t *testing.T) {
 	f.store.Save(store.Received, "secret.png", strings.NewReader("x"))
 	if got := pending(t, f, "nope,secret.png"); len(got) != 0 {
 		t.Fatalf("pending = %v", got)
+	}
+}
+
+func TestHealthzIdentifiesWiFerry(t *testing.T) {
+	f := setup(t)
+	rec := f.do(httptest.NewRequest("GET", "/healthz", nil))
+	if rec.Body.String() != HealthBody {
+		t.Fatalf("body = %q", rec.Body)
+	}
+}
+
+func TestQuitHostOnly(t *testing.T) {
+	quit := make(chan bool, 1)
+	f := setupWith(t, Config{OnQuit: func() { quit <- true }})
+	r := clientReq("POST", "/api/quit", nil)
+	r.Header.Set("X-WiFerry", "1")
+	if rec := f.do(r); rec.Code != 403 {
+		t.Fatalf("client quit = %d", rec.Code)
+	}
+	if rec := f.do(hostReq("POST", "/api/quit", nil)); rec.Code != 403 {
+		t.Fatalf("quit without CSRF header = %d", rec.Code)
+	}
+	r = hostReq("POST", "/api/quit", nil)
+	r.Header.Set("X-WiFerry", "1")
+	if rec := f.do(r); rec.Code != 204 {
+		t.Fatalf("host quit = %d", rec.Code)
+	}
+	select {
+	case <-quit:
+	case <-time.After(2 * time.Second):
+		t.Fatal("OnQuit not called")
+	}
+}
+
+func TestInstallEndpoint(t *testing.T) {
+	called := false
+	f := setupWith(t, Config{
+		Install: func() (install.Result, error) {
+			called = true
+			return install.Result{Shortcuts: []string{"/x/wiferry.desktop"}}, nil
+		},
+		Installed: func() bool { return called },
+	})
+	rec := f.do(hostReq("GET", "/api/info", nil))
+	if !strings.Contains(rec.Body.String(), `"install":{"installed":false,"supported":true}`) {
+		t.Fatalf("info = %s", rec.Body)
+	}
+	r := clientReq("POST", "/api/install", nil)
+	r.Header.Set("X-WiFerry", "1")
+	if rec := f.do(r); rec.Code != 403 || called {
+		t.Fatalf("client install = %d called=%v", rec.Code, called)
+	}
+	r = hostReq("POST", "/api/install", nil)
+	r.Header.Set("X-WiFerry", "1")
+	rec = f.do(r)
+	if rec.Code != 200 || !called || !strings.Contains(rec.Body.String(), "wiferry.desktop") {
+		t.Fatalf("host install = %d %s", rec.Code, rec.Body)
+	}
+	rec = f.do(hostReq("GET", "/api/info", nil))
+	if !strings.Contains(rec.Body.String(), `"installed":true`) {
+		t.Fatalf("info after = %s", rec.Body)
+	}
+}
+
+func TestInstallUnsupportedWhenNoFunc(t *testing.T) {
+	f := setup(t)
+	rec := f.do(hostReq("GET", "/api/info", nil))
+	if !strings.Contains(rec.Body.String(), `"supported":false`) {
+		t.Fatalf("info = %s", rec.Body)
+	}
+}
+
+func TestIconsServed(t *testing.T) {
+	f := setup(t)
+	for _, p := range []string{"/static/icon.png", "/static/apple-touch-icon.png", "/favicon.ico"} {
+		rec := f.do(clientReq("GET", p, nil))
+		if rec.Code != 200 || rec.Body.Len() < 100 {
+			t.Errorf("%s = %d (%d bytes)", p, rec.Code, rec.Body.Len())
+		}
 	}
 }

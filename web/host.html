@@ -4,10 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>WiFerry</title>
+  <link rel="icon" type="image/png" href="/static/icon.png">
+  <link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
   <link rel="stylesheet" href="/static/app.css">
 </head>
 <body>
-<main>
+<main id="app">
   <header class="top">
     <div class="logo"><i data-icon="logo"></i></div>
     <div class="brand">
@@ -15,7 +17,18 @@
       <div class="sub" id="hostname">This PC</div>
     </div>
     <div id="conn" class="pill"><span class="dot"></span><span id="conn-text">Ready</span></div>
+    <button id="stop" class="icon-btn danger" title="Stop WiFerry" aria-label="Stop WiFerry" hidden><i data-icon="power"></i></button>
   </header>
+
+  <section id="install" class="card install" hidden>
+    <img src="/static/icon.png" alt="" class="app-icon">
+    <div class="install-text">
+      <strong id="install-title">Add WiFerry to your desktop</strong>
+      <span id="install-sub" class="muted">Start it next time with one click from the desktop or app menu.</span>
+    </div>
+    <button id="install-btn" class="btn primary" type="button">Add shortcut</button>
+    <button id="install-close" class="icon-btn" type="button" title="Not now" aria-label="Not now"><i data-icon="x"></i></button>
+  </section>
 
   <div class="grid host">
     <section class="card sticky">
@@ -57,6 +70,13 @@
       </section>
     </div>
   </div>
+</main>
+<main id="stopped" hidden>
+  <section class="card stopped">
+    <img src="/static/icon.png" alt="" class="app-icon">
+    <h2>WiFerry stopped</h2>
+    <p class="muted">You can close this tab. Start it again from the desktop or app menu.</p>
+  </section>
 </main>
 <script src="/static/common.js"></script>
 <script src="/static/host.js"></script>

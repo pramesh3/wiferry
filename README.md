@@ -10,18 +10,37 @@ Works with iPhone first, but any device with a browser (Android, another PC) wor
 
 ## Quick start
 
-1. Download the binary for your PC from Releases (or [build it](#build-from-source)):
-   - Linux: `wiferry-linux-amd64` (or `-arm64`)
+1. Download the file for your PC from Releases (or [build it](#build-from-source)):
    - Windows: `wiferry-windows-amd64.exe`
-2. Run it. A browser page opens on your PC with a QR code.
-   - Linux: `chmod +x wiferry-linux-amd64 && ./wiferry-linux-amd64`
-   - Windows: double-click the `.exe`. If Windows Firewall asks, allow it on **Private networks**.
-3. Put the phone on the **same Wi-Fi** as the PC (or connect the PC to the iPhone's Personal Hotspot).
-4. Scan the QR code with the iPhone **Camera app** and tap the link (it opens Safari).
+   - Linux: `wiferry-linux-amd64` (or `-arm64` for ARM PCs like a Raspberry Pi)
+2. Start it:
+   - **Windows:** double-click the `.exe`. If Windows Firewall asks, allow it on **Private networks**.
+     (If SmartScreen warns about an unknown app, click *More info → Run anyway*.)
+   - **Linux:** right-click the file → Properties → allow running as a program, then double-click it.
+     Or in a terminal: `chmod +x wiferry-linux-amd64 && ./wiferry-linux-amd64`
+3. The WiFerry page opens in your browser. Click **Add shortcut** to put WiFerry on your desktop and in
+   your app menu / Start Menu. From then on, just click the WiFerry icon.
+4. Put the phone on the **same Wi-Fi** as the PC (or connect the PC to the iPhone's Personal Hotspot).
+5. Scan the QR code with the iPhone **Camera app** and tap the link (it opens Safari).
    The Control Center **Code Scanner** opens a mini viewer that can't save downloads; tap its compass button to move to Safari.
-5. **Send files**: tap the button and choose Photo Library, Take Photo, or Choose File.
-   **Receive files**: drop files on the PC page under "Share to devices", then tap them on the phone.
+6. **Send files**: tap **Send to PC** and choose Photo Library, Take Photo, or Choose File.
+   **Receive files**: drop files on the PC page under "Share to phone", then tap them on the phone.
    Once a phone has fully downloaded a file, it is removed from the shared list (the copy in `~/WiFerry/Shared` is deleted; your originals are untouched).
+
+### Launching and stopping
+
+- Click the **WiFerry** icon on your desktop or in the app menu. Clicking it again while it's running just reopens the page.
+- To quit, click the **power button** at the top right of the WiFerry page (or press Ctrl+C if you started it in a terminal).
+- Shortcuts can also be added or removed from a terminal: `wiferry --install` / `wiferry --uninstall`.
+  Uninstalling keeps your files in `~/WiFerry`.
+
+Where things are installed (current user only, no admin rights needed):
+
+| | Linux | Windows |
+|---|---|---|
+| App | `~/.local/bin/wiferry` | `%LOCALAPPDATA%\Programs\WiFerry\WiFerry.exe` |
+| Menu | `~/.local/share/applications/wiferry.desktop` | Start Menu → WiFerry |
+| Desktop | `~/Desktop/wiferry.desktop` | Desktop → WiFerry |
 
 Received files go to `~/WiFerry/Received` (Windows: `C:\Users\<you>\WiFerry\Received`).
 
@@ -49,7 +68,7 @@ WiFerry needs no internet, only a shared network:
 ## Options
 
 ```
-wiferry [--port 8642] [--dir ~/WiFerry] [--no-browser]
+wiferry [--port 8642] [--dir ~/WiFerry] [--no-browser] [--install | --uninstall]
 ```
 
 If port 8642 is busy and `--port` wasn't given, a free port is chosen.

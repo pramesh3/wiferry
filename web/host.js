@@ -8,6 +8,44 @@
   $("hostname").textContent = info.hostname;
   $("dir").textContent = info.dir;
 
+  // Offer desktop/app-menu shortcuts until installed (or dismissed).
+  let dismissed = false;
+  try { dismissed = localStorage.getItem("wiferry.installDismissed") === "1"; } catch (e) {}
+  if (info.install.supported && !info.install.installed && !dismissed) $("install").hidden = false;
+  $("install-close").addEventListener("click", () => {
+    WF.leave($("install"));
+    try { localStorage.setItem("wiferry.installDismissed", "1"); } catch (e) {}
+  });
+  $("install-btn").addEventListener("click", async () => {
+    const btn = $("install-btn");
+    btn.classList.add("disabled");
+    btn.textContent = "Adding…";
+    try {
+      const r = await fetch("/api/install", { method: "POST", headers: { "X-WiFerry": "1" } });
+      if (!r.ok) throw new Error((await r.text()).trim());
+      $("install").classList.add("done");
+      $("install-title").textContent = "Added to your desktop and app menu";
+      $("install-sub").textContent = "Next time, just click the WiFerry icon.";
+      btn.hidden = true;
+      setTimeout(() => WF.leave($("install")), 5000);
+    } catch (e) {
+      $("install-sub").textContent = "Couldn't add the shortcut: " + e.message;
+      btn.classList.remove("disabled");
+      btn.textContent = "Try again";
+    }
+  });
+
+  // Stop button: there's no terminal to close when started from an icon.
+  if (info.canQuit) {
+    $("stop").hidden = false;
+    $("stop").addEventListener("click", async () => {
+      if (!confirm("Stop WiFerry? Phones will disconnect.")) return;
+      await fetch("/api/quit", { method: "POST", headers: { "X-WiFerry": "1" } }).catch(() => {});
+      $("app").hidden = true;
+      $("stopped").hidden = false;
+    });
+  }
+
   function showQR(u) {
     const img = $("qr");
     img.classList.remove("ready");

@@ -29,7 +29,7 @@ start
 [ -n "$URL" ] && ok "banner prints LAN URL with token ($BASE)" || bad "no LAN URL in banner"
 grep -q '█' "$W/log" && ok "terminal QR printed" || bad "terminal QR missing"
 [ -d "$W/data/Received" ] && [ -d "$W/data/Shared" ] && ok "folders created" || bad "folders missing"
-check "healthz" "$(curl -s localhost:$PORT/healthz)" "ok"
+check "healthz identifies WiFerry" "$(curl -s localhost:$PORT/healthz)" "wiferry"
 
 echo "== auth / security"
 check "LAN without token -> 403" "$(code $BASE/)" "403"
@@ -118,6 +118,13 @@ PEAK=$(sort -n "$W/rss" | tail -1); echo "        upload took $((T1-T0))s, peak 
 [ "$PEAK" -lt 204800 ] && ok "server memory stays small (< 200 MB)" || bad "memory too high" "$PEAK KB"
 rm -f "$W/in/huge.bin"
 
+echo "== second launch reuses running instance"
+hshare "$W/in/a.txt" "keepme.txt" >/dev/null
+OUT=$("$BIN" --no-browser --dir "$W/data" --port $PORT 2>&1); RC=$?
+[ $RC -eq 0 ] && echo "$OUT" | grep -q "already running" && ok "second launch says already running, exits 0" || bad "second launch" "$OUT"
+check "second launch did not clear Shared" "$(shared)" "keepme.txt "
+check "first instance still serving" "$(curl -s localhost:$PORT/healthz)" "wiferry"
+
 echo "== restart = fresh session"
 hshare "$W/in/a.txt" "leftover.txt" >/dev/null
 pupload "$W/in/a.txt" "old-received.txt" >/dev/null
@@ -126,6 +133,10 @@ check "Shared emptied on start" "$(shared)" ""
 check "old received file kept on disk" "$(received)" "old-received.txt "
 check "old received hidden from list" "$(curl -s "$HOST/api/files?box=received")" "[]"
 check "old QR token rejected" "$(code "$OLDURL")" "403"
+check "Stop from phone refused" "$(phone -o /dev/null -w '%{http_code}' -X POST -H 'X-WiFerry: 1' "$BASE/api/quit")" "403"
+check "Stop from PC page" "$(code -X POST -H 'X-WiFerry: 1' "$HOST/api/quit")" "204"
+sleep 1
+kill -0 $PID 2>/dev/null && bad "server still running after Stop" || ok "server exited after Stop"
 stop
 
 echo "== port handling"

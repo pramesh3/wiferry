@@ -20,6 +20,7 @@ import (
 	"time"
 
 	"wiferry/internal/auth"
+	"wiferry/internal/install"
 	"wiferry/internal/netinfo"
 	"wiferry/internal/qr"
 	"wiferry/internal/store"
@@ -34,7 +35,16 @@ type Config struct {
 	ListIPs func() ([]netinfo.Addr, error)
 	// SessionStart hides Received files from earlier runs (they stay on disk).
 	SessionStart time.Time
+	// OnQuit is called after the host presses Stop. Nil disables Stop.
+	OnQuit func()
+	// Install adds desktop/app-menu shortcuts. Nil means unsupported.
+	Install   func() (install.Result, error)
+	Installed func() bool
 }
+
+// HealthBody is what /healthz returns; a second launch uses it to detect a
+// WiFerry already running on the port.
+const HealthBody = "wiferry"
 
 type srv struct {
 	Config
@@ -54,7 +64,10 @@ func New(cfg Config) http.Handler {
 	s := &srv{Config: cfg, receipts: map[string]string{}}
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, r *http.Request) { io.WriteString(w, "ok") })
+	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, r *http.Request) { io.WriteString(w, HealthBody) })
+	mux.HandleFunc("GET /favicon.ico", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFileFS(w, r, web.FS, "icon.ico")
+	})
 	mux.HandleFunc("GET /{$}", s.page("client.html"))
 	mux.HandleFunc("GET /host", hostOnly(s.page("host.html")))
 	mux.Handle("GET /static/", http.StripPrefix("/static/", staticOnly(http.FileServerFS(web.FS))))
@@ -68,6 +81,8 @@ func New(cfg Config) http.Handler {
 	mux.HandleFunc("GET /api/download/{box}/{name}", s.download)
 	mux.HandleFunc("GET /api/zip/{box}", s.zip)
 	mux.HandleFunc("DELETE /api/files/{box}/{name}", hostOnly(s.delete))
+	mux.HandleFunc("POST /api/quit", hostOnly(s.quit))
+	mux.HandleFunc("POST /api/install", hostOnly(s.install))
 
 	return cfg.Auth.Middleware(csrf(mux))
 }
@@ -97,7 +112,7 @@ func hostOnly(h http.HandlerFunc) http.HandlerFunc {
 func staticOnly(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch path.Ext(r.URL.Path) {
-		case ".css", ".js", ".svg":
+		case ".css", ".js", ".svg", ".png", ".ico":
 			h.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
@@ -163,7 +178,11 @@ func (s *srv) info(w http.ResponseWriter, r *http.Request) {
 		urls = append(urls, urlInfo{IP: a.IP, Iface: a.Iface, URL: s.url(a.IP)})
 	}
 	host, _ := os.Hostname()
-	writeJSON(w, map[string]any{"hostname": host, "dir": s.Store.Base(), "port": s.Port, "urls": urls})
+	inst := map[string]bool{
+		"supported": s.Install != nil,
+		"installed": s.Installed != nil && s.Installed(),
+	}
+	writeJSON(w, map[string]any{"hostname": host, "dir": s.Store.Base(), "port": s.Port, "urls": urls, "install": inst, "canQuit": s.OnQuit != nil})
 }
 
 func (s *srv) qrPNG(w http.ResponseWriter, r *http.Request) {
@@ -388,6 +407,33 @@ func (s *srv) zip(w http.ResponseWriter, r *http.Request) {
 		}
 		s.removeDelivered(b, names, r)
 	}
+}
+
+func (s *srv) quit(w http.ResponseWriter, r *http.Request) {
+	if s.OnQuit == nil {
+		http.Error(w, "stop not available", http.StatusNotImplemented)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+	if f, ok := w.(http.Flusher); ok {
+		f.Flush()
+	}
+	go s.OnQuit()
+}
+
+func (s *srv) install(w http.ResponseWriter, r *http.Request) {
+	if s.Install == nil {
+		http.Error(w, "shortcuts are not supported on this system", http.StatusNotImplemented)
+		return
+	}
+	res, err := s.Install()
+	if err != nil {
+		log.Printf("install: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	log.Printf("installed shortcuts: %v", res.Shortcuts)
+	writeJSON(w, res)
 }
 
 func (s *srv) delete(w http.ResponseWriter, r *http.Request) {

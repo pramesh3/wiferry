@@ -95,6 +95,22 @@ main {
 .pill.err { background: var(--err-soft); color: var(--err); }
 .pill.err .dot::after, .pill.warn .dot::after { animation: none; }
 
+.top .icon-btn { margin-left: -4px; }
+
+/* Install prompt + stopped screen */
+.install {
+  display: flex; align-items: center; gap: 14px; margin-bottom: 16px; flex-wrap: wrap;
+  background: linear-gradient(120deg, var(--accent-soft), transparent 70%), var(--surface);
+}
+.app-icon { width: 48px; height: 48px; border-radius: 12px; flex: none; }
+.install-text { flex: 1; min-width: 200px; display: grid; gap: 2px; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); padding: 9px 18px; }
+.btn.primary:hover { filter: brightness(1.08); }
+.install.done { border-color: var(--ok); }
+.stopped { max-width: 420px; margin: 18vh auto 0; text-align: center; display: grid; justify-items: center; gap: 4px; }
+.stopped .app-icon { width: 72px; height: 72px; border-radius: 18px; margin-bottom: 8px; }
+.stopped h2 { margin: 0; }
+
 /* Layout */
 .grid { display: grid; gap: 16px; align-items: start; }
 @media (min-width: 820px) {

@@ -6,5 +6,5 @@ import "embed"
 
 // FS contains the HTML, CSS and JS assets.
 //
-//go:embed *.html *.css *.js
+//go:embed *.html *.css *.js *.png *.ico
 var FS embed.FS
