@@ -13,6 +13,7 @@
   <a href="https://github.com/pramesh3/wiferry/releases/latest"><img src="https://img.shields.io/github/v/release/pramesh3/wiferry?label=download" alt="Latest release"></a>
   <a href="https://github.com/pramesh3/wiferry/actions/workflows/ci.yml"><img src="https://github.com/pramesh3/wiferry/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT license"></a>
+  <a href="https://buymeacoffee.com/pramesh3"><img src="https://img.shields.io/badge/Buy%20me%20a%20coffee-support-FFDD00?logo=buymeacoffee&logoColor=black" alt="Buy me a coffee"></a>
 </p>
 
 <p align="center">
@@ -164,7 +165,17 @@ make build-all   # linux-amd64, linux-arm64, windows-amd64 in dist/
 
 Issues and pull requests are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md). Testing on real iPhones, iOS versions, Windows PCs and Android phones is especially helpful; see [docs/manual-test-checklist.md](docs/manual-test-checklist.md).
 
-If WiFerry saved you a cable hunt, a ⭐ helps other people find it.
+## Support
+
+WiFerry is free and open source, built in my spare time. If it saved you a cable hunt or a cloud upload, you can:
+
+- ⭐ **Star the repo** so other people can find it
+- 🐛 **Report bugs** or share what device you tested on
+- ☕ **[Buy me a coffee](https://buymeacoffee.com/pramesh3)** to support development
+
+<p>
+  <a href="https://buymeacoffee.com/pramesh3"><img src="https://img.buymeacoffee.com/button-api/?text=Buy%20me%20a%20coffee&emoji=%E2%98%95&slug=pramesh3&button_colour=FFDD00&font_colour=000000&font_family=Inter&outline_colour=000000&coffee_colour=ffffff" height="42" alt="Buy me a coffee"></a>
+</p>
 
 ## License
 
