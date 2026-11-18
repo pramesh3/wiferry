@@ -35,8 +35,15 @@ func TestInstallUninstallWindows(t *testing.T) {
 	}
 	for _, lnk := range res.Shortcuts {
 		target, err := powershell("(New-Object -ComObject WScript.Shell).CreateShortcut(" + psQuote(lnk) + ").TargetPath")
-		if err != nil || !strings.EqualFold(target, exe) {
-			t.Fatalf("%s target = %q (%v), want %s", lnk, target, err, exe)
+		if err != nil {
+			t.Fatalf("%s: read target: %v", lnk, err)
+		}
+		// Compare files, not strings: Windows may report the same folder
+		// by its short (RUNNER~1) or long (runneradmin) name.
+		a, errA := os.Stat(target)
+		b, errB := os.Stat(exe)
+		if errA != nil || errB != nil || !os.SameFile(a, b) {
+			t.Fatalf("%s target = %q, want %s", lnk, target, exe)
 		}
 	}
 
