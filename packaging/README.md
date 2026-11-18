@@ -7,7 +7,7 @@ Package manifests for WiFerry. Each release, update the version and checksums
 |---|---|---|---|
 | Scoop (Windows) | `scoop/wiferry.json` | Works now, straight from this repo | `scoop install https://raw.githubusercontent.com/pramesh3/wiferry/main/packaging/scoop/wiferry.json` |
 | winget (Windows) | `winget/*.yaml` | Needs a PR to microsoft/winget-pkgs | `winget install pramesh3.WiFerry` |
-| AUR (Arch Linux) | `aur/wiferry-bin/` | Needs an AUR account | `yay -S wiferry-bin` |
+| AUR (Arch Linux) | `aur/wiferry-bin/` | Ready; looking for an Arch user to maintain it | `yay -S wiferry-bin` |
 
 ## winget
 

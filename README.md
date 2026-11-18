@@ -138,7 +138,7 @@ Installed for the current user only, no admin rights needed:
 <summary><b>Install with a package manager</b></summary>
 
 - **Scoop (Windows):** `scoop install https://raw.githubusercontent.com/pramesh3/wiferry/main/packaging/scoop/wiferry.json`
-- **winget** and **AUR** are on the way; see [packaging/](packaging/).
+- **winget** is on the way. Other package managers: see [packaging/](packaging/), help welcome.
 </details>
 
 <details>
