@@ -3,19 +3,32 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f5f6f8" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0c0f13" media="(prefers-color-scheme: dark)">
+  <meta name="apple-mobile-web-app-title" content="WiFerry">
   <title>WiFerry</title>
   <link rel="stylesheet" href="/static/app.css">
 </head>
 <body>
 <main>
-  <header><h1>WiFerry</h1><span>Connected to PC</span></header>
+  <header class="top">
+    <div class="logo"><i data-icon="logo"></i></div>
+    <div class="brand">
+      <h1>WiFerry</h1>
+      <div class="sub">Local Wi-Fi · no internet</div>
+    </div>
+    <div id="conn" class="pill"><span class="dot"></span><span id="conn-text">Connected</span></div>
+  </header>
 
-  <div class="grid">
+  <div class="stack">
     <section class="card">
-      <h2>Send to PC</h2>
       <input id="pick" type="file" multiple>
-      <button class="primary" id="send">Send files</button>
-      <div id="busy" class="warn" hidden>Keep this screen open until sending finishes.</div>
+      <button class="drop" id="send" type="button">
+        <span class="orb"><i data-icon="up"></i></span>
+        <strong>Send to PC</strong>
+        <span>Photos, videos or any file</span>
+      </button>
+      <div id="busy" class="note warn" hidden><i data-icon="info"></i><span>Keep this screen open until sending finishes.</span></div>
       <div id="queue" class="queue"></div>
       <details>
         <summary>Tips for iPhone</summary>
@@ -28,18 +41,20 @@
     </section>
 
     <section class="card">
-      <div class="row spread">
+      <div class="card-head">
         <h2>From PC</h2>
-        <a class="btn small" href="/api/zip/shared" download>Download all</a>
+        <span id="count" class="count">0</span>
+        <span class="spacer"></span>
+        <a id="all" class="btn disabled" href="/api/zip/shared" download><i data-icon="down"></i>Download all</a>
       </div>
       <ul id="shared" class="files"></ul>
-      <p class="warn">Downloads only save in <b>Safari</b>. If you scanned with the Code Scanner and see a compass button at the bottom, tap it to open this page in Safari. (Scanning with the Camera app opens Safari directly.)</p>
+      <div class="note"><i data-icon="compass"></i><span>Downloads only save in <b>Safari</b>. Scanned with the Code Scanner? Tap its compass button to open this page in Safari. The Camera app opens Safari directly.</span></div>
       <details>
-        <summary>Where do downloads go on iPhone?</summary>
+        <summary>Where do downloads go?</summary>
         <ul>
           <li><b>Find them:</b> in Safari tap <b>AA</b> → <b>Downloads</b>, or open Files → Downloads.</li>
           <li><b>Keep them on the phone, not iCloud:</b> Settings → Apps → Safari → Downloads → <b>On My iPhone</b> (one time).</li>
-          <li><b>Download all</b> saves a dated zip, e.g. <i>WiFerry-2026-11-17_15-42.zip</i>. Tap it once in Files and it becomes a folder with all the files.</li>
+          <li><b>Download all</b> saves a dated zip. Tap it once in Files and it becomes a folder.</li>
           <li>If Safari asks, tap <b>Download</b> (not View).</li>
           <li>To add a photo to Photos: open it in Files → Share → Save Image.</li>
         </ul>
