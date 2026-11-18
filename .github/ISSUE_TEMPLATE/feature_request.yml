@@ -1,0 +1,27 @@
+name: Feature idea
+description: Suggest something that would make WiFerry better
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        WiFerry deliberately stays small: **offline only**, **nothing to install on the phone**, **one file on the PC**. Ideas that keep those three are the easiest to accept. Check the [roadmap](https://github.com/pramesh3/wiferry/blob/main/ROADMAP.md) first, it may already be planned.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What are you trying to do?
+      description: Describe the problem or situation, not just the solution.
+      placeholder: I send 200 photos at a time and can't tell how long it will take.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: What would help?
+      placeholder: Show the speed and time left next to the progress bar.
+  - type: checkboxes
+    id: help
+    attributes:
+      label: Contributing
+      options:
+        - label: I'd like to work on this myself

@@ -1,0 +1,59 @@
+name: Bug report
+description: Something didn't work as expected
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for reporting! The device details below help a lot, since WiFerry depends on how each phone and PC behaves.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What did you do, what did you expect, and what happened instead?
+      placeholder: |
+        1. Started WiFerry on Windows 11
+        2. Scanned the QR with the iPhone camera
+        3. Tapped "Send to PC" and picked 20 photos
+        4. Upload stopped at 40% with "Failed"
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: WiFerry version
+      description: Shown at the bottom of the PC page, or run `wiferry --version`.
+      placeholder: v0.1.1
+    validations:
+      required: true
+  - type: dropdown
+    id: pc
+    attributes:
+      label: PC operating system
+      options: [Windows 11, Windows 10, Linux, macOS (from source), Other]
+    validations:
+      required: true
+  - type: input
+    id: pc-details
+    attributes:
+      label: PC details
+      description: Linux distro and desktop, or Windows build. Browser used on the PC.
+      placeholder: Ubuntu 24.04, GNOME, Firefox 132
+  - type: input
+    id: phone
+    attributes:
+      label: Phone and browser
+      placeholder: iPhone 15, iOS 18.1, Safari
+    validations:
+      required: true
+  - type: dropdown
+    id: network
+    attributes:
+      label: Network
+      options: [Home/office Wi-Fi router, iPhone Personal Hotspot, PC hotspot, Other]
+    validations:
+      required: true
+  - type: textarea
+    id: extra
+    attributes:
+      label: Screenshots or terminal output
+      description: If you ran WiFerry from a terminal, paste what it printed. Remove the `?t=...` code from any URLs.

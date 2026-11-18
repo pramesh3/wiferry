@@ -1,0 +1,53 @@
+name: Device test report
+description: "It works (or doesn't) on my device: help us cover more phones and PCs"
+labels: [device-report]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you! Reports of what **works** are just as useful as bug reports. You can follow [the manual test checklist](https://github.com/pramesh3/wiferry/blob/main/docs/manual-test-checklist.md) or just try the basics.
+  - type: input
+    id: version
+    attributes:
+      label: WiFerry version
+      placeholder: v0.1.1
+    validations:
+      required: true
+  - type: input
+    id: pc
+    attributes:
+      label: PC (OS, version, browser)
+      placeholder: Windows 11 23H2, Edge
+    validations:
+      required: true
+  - type: input
+    id: phone
+    attributes:
+      label: Phone (model, OS version, browser)
+      placeholder: iPhone 13 mini, iOS 17.6, Safari
+    validations:
+      required: true
+  - type: dropdown
+    id: network
+    attributes:
+      label: Network
+      options: [Home/office Wi-Fi router, iPhone Personal Hotspot, PC hotspot, Other]
+    validations:
+      required: true
+  - type: checkboxes
+    id: results
+    attributes:
+      label: What worked?
+      options:
+        - label: App started and the page opened on the PC
+        - label: Scanning the QR opened the page on the phone
+        - label: Phone → PC (photos / Files)
+        - label: PC → phone, and the file landed in Files → Downloads
+        - label: Files disappeared from both sides after download
+        - label: Add shortcut created the desktop / menu icon
+        - label: The power button stopped WiFerry
+  - type: textarea
+    id: notes
+    attributes:
+      label: Anything odd?
+      description: Firewall or SmartScreen prompts, slow transfers, layout glitches, file types that failed.

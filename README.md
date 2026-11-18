@@ -163,7 +163,10 @@ make build-all   # linux-amd64, linux-arm64, windows-amd64 in dist/
 
 ## Contributing
 
-Issues and pull requests are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md). Testing on real iPhones, iOS versions, Windows PCs and Android phones is especially helpful; see [docs/manual-test-checklist.md](docs/manual-test-checklist.md).
+Issues and pull requests are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md), the [roadmap](ROADMAP.md) and the [changelog](CHANGELOG.md).
+
+- **No code needed:** try WiFerry on your devices and file a [device test report](https://github.com/pramesh3/wiferry/issues/new?template=device_report.yml). Real iPhones, iOS versions, Windows PCs and Android phones are especially helpful.
+- **New to the code?** Start with a [`good first issue`](https://github.com/pramesh3/wiferry/labels/good%20first%20issue).
 
 ## Support
 
