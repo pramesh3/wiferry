@@ -242,7 +242,13 @@ func (s *srv) files(b store.Box) ([]store.FileInfo, error) {
 	return out, nil
 }
 
-func attachment(w http.ResponseWriter, name string) {
+// attachment marks a response as a file download. For other devices (the
+// phone) the type is generic binary: iOS Safari otherwise opens zips and
+// other known types in a preview screen instead of saving them to Files.
+func attachment(w http.ResponseWriter, r *http.Request, name string) {
+	if !auth.IsLoopback(r) {
+		w.Header().Set("Content-Type", "application/octet-stream")
+	}
 	w.Header().Set("Content-Disposition", mime.FormatMediaType("attachment", map[string]string{"filename": name}))
 }
 
@@ -257,20 +263,24 @@ func (s *srv) download(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	attachment(w, name)
+	attachment(w, r, name)
 	cw := &countingWriter{ResponseWriter: w, status: http.StatusOK}
 	http.ServeContent(cw, r, name, fi.ModTime(), f)
 	f.Close() // must close before delete (Windows)
 
-	if consumesShared(r, b) && r.Method == http.MethodGet && cw.status == http.StatusOK && cw.n == fi.Size() {
+	if consumes(r, b) && r.Method == http.MethodGet && cw.status == http.StatusOK && cw.n == fi.Size() {
 		s.removeDelivered(b, []string{name}, r)
 	}
 }
 
-// consumesShared reports whether a completed download should remove the file:
-// only when another device (not this PC) takes it from the Shared box.
-func consumesShared(r *http.Request, b store.Box) bool {
-	return b == store.Shared && !auth.IsLoopback(r)
+// consumes reports whether a completed download should remove the file
+// because it has reached the other side: Shared files taken by another
+// device, or Received files saved by this PC's browser.
+func consumes(r *http.Request, b store.Box) bool {
+	if auth.IsLoopback(r) {
+		return b == store.Received
+	}
+	return b == store.Shared
 }
 
 func (s *srv) removeDelivered(b store.Box, names []string, r *http.Request) {
@@ -310,7 +320,7 @@ func (s *srv) zip(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/zip")
 	// Dated name: unzipping on iPhone/Windows/macOS creates a folder with this
 	// name, and repeated downloads never overwrite each other.
-	attachment(w, "WiFerry-"+time.Now().Format("2006-01-02_15-04")+".zip")
+	attachment(w, r, "WiFerry-"+time.Now().Format("2006-01-02_15-04")+".zip")
 	files, err := s.files(b)
 	if err == nil {
 		err = s.Store.WriteZip(b, files, w)
@@ -319,7 +329,7 @@ func (s *srv) zip(w http.ResponseWriter, r *http.Request) {
 		log.Printf("zip %s: %v", b, err) // incomplete: keep files
 		return
 	}
-	if consumesShared(r, b) {
+	if consumes(r, b) {
 		names := make([]string, len(files))
 		for i, fi := range files {
 			names[i] = fi.Name

@@ -325,3 +325,63 @@ func TestReceivedShowsOnlyThisSession(t *testing.T) {
 		t.Fatalf("old file removed: %v", err)
 	}
 }
+
+func receivedNames(f *fixture) []string {
+	list, _ := f.store.List(store.Received)
+	names := []string{}
+	for _, fi := range list {
+		names = append(names, fi.Name)
+	}
+	return names
+}
+
+func TestHostDownloadDeletesReceivedFile(t *testing.T) {
+	f := setup(t)
+	f.store.Save(store.Received, "a.png", strings.NewReader("AAAA"))
+	f.store.Save(store.Received, "b.png", strings.NewReader("BBBB"))
+	rec := f.do(hostReq("GET", "/api/download/received/a.png", nil))
+	if rec.Code != 200 || rec.Body.String() != "AAAA" {
+		t.Fatalf("download = %d %q", rec.Code, rec.Body)
+	}
+	if got := receivedNames(f); len(got) != 1 || got[0] != "b.png" {
+		t.Fatalf("received after download = %v", got)
+	}
+}
+
+func TestHostZipDeletesReceivedFiles(t *testing.T) {
+	f := setup(t)
+	f.store.Save(store.Received, "a.png", strings.NewReader("AAAA"))
+	f.store.Save(store.Received, "b.png", strings.NewReader("BBBB"))
+	rec := f.do(hostReq("GET", "/api/zip/received", nil))
+	if zr, err := zip.NewReader(bytes.NewReader(rec.Body.Bytes()), int64(rec.Body.Len())); err != nil || len(zr.File) != 2 {
+		t.Fatalf("zip err=%v", err)
+	}
+	if got := receivedNames(f); len(got) != 0 {
+		t.Fatalf("received after zip = %v", got)
+	}
+}
+
+func TestHostPartialReceivedDownloadKeepsFile(t *testing.T) {
+	f := setup(t)
+	f.store.Save(store.Received, "a.png", strings.NewReader("AAAA"))
+	r := hostReq("GET", "/api/download/received/a.png", nil)
+	r.Header.Set("Range", "bytes=0-1")
+	f.do(r)
+	if got := receivedNames(f); len(got) != 1 {
+		t.Fatalf("received = %v, want kept", got)
+	}
+}
+
+func TestPhoneDownloadsAreGenericBinary(t *testing.T) {
+	f := setup(t)
+	f.store.Save(store.Shared, "a.jpg", strings.NewReader("AAAA"))
+	f.store.Save(store.Shared, "b.jpg", strings.NewReader("BBBB"))
+	rec := f.do(clientReq("GET", "/api/download/shared/a.jpg", nil))
+	if ct := rec.Header().Get("Content-Type"); ct != "application/octet-stream" {
+		t.Fatalf("file content-type = %q", ct)
+	}
+	rec = f.do(clientReq("GET", "/api/zip/shared", nil))
+	if ct := rec.Header().Get("Content-Type"); ct != "application/octet-stream" {
+		t.Fatalf("zip content-type = %q", ct)
+	}
+}

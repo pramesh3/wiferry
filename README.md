@@ -24,7 +24,9 @@ Works with iPhone first, but any device with a browser (Android, another PC) wor
 
 Received files go to `~/WiFerry/Received` (Windows: `C:\Users\<you>\WiFerry\Received`).
 
-Every start is a fresh session: the shared list starts empty, and the PC page shows only files received in this session. Older received files stay in the folder.
+Files work like a hand-off in both directions: once the other side has fully downloaded a file, it disappears from the list. On the PC, downloading a received file saves it to your browser's Downloads and removes it from `~/WiFerry/Received`.
+
+Every start is a fresh session: the shared list starts empty, and the PC page shows only files received in this session. Received files you never downloaded stay in the folder.
 
 ## No router? Use a hotspot
 
