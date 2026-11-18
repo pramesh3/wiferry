@@ -5,6 +5,7 @@ Notable changes to WiFerry. Versions follow [Semantic Versioning](https://semver
 ## Unreleased
 
 - Windows is now tested automatically on every change: a real Windows machine runs a full phone ↔ PC transfer and creates and removes the Start Menu and Desktop shortcuts.
+- Tested by hand on Windows 11 with an iPhone; README explains the Edge "Keep anyway" download step.
 - Issue templates for bugs, feature ideas and device test reports; a pull request template and a roadmap.
 
 ## v0.1.1 (2026-11-18)

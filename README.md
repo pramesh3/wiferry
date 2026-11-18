@@ -50,7 +50,9 @@ WiFerry is one file you run on the PC. Scan its QR code with the iPhone camera a
    - Linux: `wiferry-linux-amd64` (or `-arm64` for ARM, like a Raspberry Pi)
 2. **Start it.**
    - **Windows:** double-click the `.exe`. If Windows Firewall asks, allow it on **Private networks**.
-     If SmartScreen warns about an unknown app, click *More info → Run anyway*.
+     WiFerry is new and not code-signed yet, so Windows is cautious the first time:
+     - Edge may say the file *isn't commonly downloaded*: in Downloads, click the **⌄** next to *Delete* → **Keep anyway**.
+     - If a blue *Windows protected your PC* box appears, click **More info → Run anyway**.
    - **Linux:** right-click the file → Properties → allow running as a program, then double-click it.
      Or: `chmod +x wiferry-linux-amd64 && ./wiferry-linux-amd64`
 3. The WiFerry page opens in your browser. Click **Add shortcut** to put WiFerry on your desktop and in your app menu / Start Menu. Next time, just click the icon.
