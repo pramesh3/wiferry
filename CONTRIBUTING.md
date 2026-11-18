@@ -26,7 +26,7 @@ Thanks for helping. WiFerry aims to stay small, offline, and dependency-light.
 
 1. Fork and branch.
 2. Write a failing test first for Go changes, then make it pass.
-3. `make test` must pass. Run `gofmt`.
+3. `make test` must pass. Run `gofmt`. Before larger PRs run `make check` (adds the end-to-end and headless-Chrome UI suites in `scripts/`).
 4. For UI or iOS behaviour changes, run through `docs/manual-test-checklist.md` and note your device + iOS version in the PR.
 5. Keep PRs focused; explain the "why".
 
