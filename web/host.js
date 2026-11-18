@@ -7,6 +7,7 @@
   const info = await (await fetch("/api/info", { cache: "no-store" })).json();
   $("hostname").textContent = info.hostname;
   $("dir").textContent = info.dir;
+  $("version").textContent = info.version || "";
 
   // Offer desktop/app-menu shortcuts until installed (or dismissed).
   let dismissed = false;

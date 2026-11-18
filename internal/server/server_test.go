@@ -43,6 +43,7 @@ func setupWith(t *testing.T, cfg Config) *fixture {
 		OnQuit:    cfg.OnQuit,
 		Install:   cfg.Install,
 		Installed: cfg.Installed,
+		Version:   cfg.Version,
 		Auth:      auth.NewWithToken(token),
 		Store:     st,
 		Port:      8642,
@@ -511,5 +512,13 @@ func TestIconsServed(t *testing.T) {
 		if rec.Code != 200 || rec.Body.Len() < 100 {
 			t.Errorf("%s = %d (%d bytes)", p, rec.Code, rec.Body.Len())
 		}
+	}
+}
+
+func TestInfoIncludesVersion(t *testing.T) {
+	f := setupWith(t, Config{Version: "v9.9.9"})
+	rec := f.do(hostReq("GET", "/api/info", nil))
+	if !strings.Contains(rec.Body.String(), `"version":"v9.9.9"`) {
+		t.Fatalf("info = %s", rec.Body)
 	}
 }

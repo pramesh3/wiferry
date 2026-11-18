@@ -29,13 +29,22 @@ import (
 
 const defaultPort = 8642
 
+// version is set at build time: -ldflags "-X main.version=v0.1.1".
+var version = "dev"
+
 func main() {
 	port := flag.Int("port", defaultPort, "port to listen on")
 	dir := flag.String("dir", "", "folder for received and shared files (default ~/WiFerry)")
 	noBrowser := flag.Bool("no-browser", false, "don't open the browser on start")
 	doInstall := flag.Bool("install", false, "add WiFerry to the app menu and desktop, then exit")
 	doUninstall := flag.Bool("uninstall", false, "remove WiFerry's shortcuts and installed app (keeps your files), then exit")
+	showVersion := flag.Bool("version", false, "print the version and exit")
 	flag.Parse()
+
+	if *showVersion {
+		fmt.Println("wiferry", version)
+		return
+	}
 
 	var err error
 	switch {
@@ -139,7 +148,7 @@ func run(port int, dir string, noBrowser, portExplicit bool) error {
 
 	srv := &http.Server{ReadHeaderTimeout: 15 * time.Second}
 	cfg := server.Config{
-		Auth: a, Store: st, Port: port, ListIPs: netinfo.List, SessionStart: sessionStart,
+		Auth: a, Store: st, Port: port, ListIPs: netinfo.List, SessionStart: sessionStart, Version: version,
 		OnQuit: func() {
 			log.Println("stopped from the WiFerry page")
 			ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)

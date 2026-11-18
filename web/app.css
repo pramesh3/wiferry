@@ -111,6 +111,14 @@ main {
 .stopped .app-icon { width: 72px; height: 72px; border-radius: 18px; margin-bottom: 8px; }
 .stopped h2 { margin: 0; }
 
+/* Footer */
+.foot {
+  display: flex; justify-content: center; align-items: center; gap: 8px; flex-wrap: wrap;
+  margin: 28px 0 4px; color: var(--muted); font-size: .8rem;
+}
+.foot a { color: var(--muted); text-decoration: none; border-bottom: 1px solid transparent; transition: color .2s, border-color .2s; }
+.foot a:hover { color: var(--accent); border-color: currentColor; }
+
 /* Layout */
 .grid { display: grid; gap: 16px; align-items: start; }
 @media (min-width: 820px) {

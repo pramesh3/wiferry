@@ -40,6 +40,8 @@ type Config struct {
 	// Install adds desktop/app-menu shortcuts. Nil means unsupported.
 	Install   func() (install.Result, error)
 	Installed func() bool
+	// Version is shown in the PC page footer (set at build time).
+	Version string
 }
 
 // HealthBody is what /healthz returns; a second launch uses it to detect a
@@ -182,7 +184,7 @@ func (s *srv) info(w http.ResponseWriter, r *http.Request) {
 		"supported": s.Install != nil,
 		"installed": s.Installed != nil && s.Installed(),
 	}
-	writeJSON(w, map[string]any{"hostname": host, "dir": s.Store.Base(), "port": s.Port, "urls": urls, "install": inst, "canQuit": s.OnQuit != nil})
+	writeJSON(w, map[string]any{"hostname": host, "dir": s.Store.Base(), "port": s.Port, "urls": urls, "install": inst, "canQuit": s.OnQuit != nil, "version": s.Version})
 }
 
 func (s *srv) qrPNG(w http.ResponseWriter, r *http.Request) {
