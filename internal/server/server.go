@@ -29,6 +29,8 @@ type Config struct {
 	Store   *store.Store
 	Port    int
 	ListIPs func() ([]netinfo.Addr, error)
+	// SessionStart hides Received files from earlier runs (they stay on disk).
+	SessionStart time.Time
 }
 
 type srv struct{ Config }
@@ -217,12 +219,27 @@ func (s *srv) list(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	files, err := s.Store.List(b)
+	files, err := s.files(b)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	writeJSON(w, files)
+}
+
+// files lists a box as shown to users: Received only includes this session.
+func (s *srv) files(b store.Box) ([]store.FileInfo, error) {
+	all, err := s.Store.List(b)
+	if err != nil || b != store.Received {
+		return all, err
+	}
+	out := []store.FileInfo{}
+	for _, fi := range all {
+		if !fi.Modified.Before(s.SessionStart) {
+			out = append(out, fi)
+		}
+	}
+	return out, nil
 }
 
 func attachment(w http.ResponseWriter, name string) {
@@ -294,12 +311,19 @@ func (s *srv) zip(w http.ResponseWriter, r *http.Request) {
 	// Dated name: unzipping on iPhone/Windows/macOS creates a folder with this
 	// name, and repeated downloads never overwrite each other.
 	attachment(w, "WiFerry-"+time.Now().Format("2006-01-02_15-04")+".zip")
-	names, err := s.Store.WriteZip(b, w)
+	files, err := s.files(b)
+	if err == nil {
+		err = s.Store.WriteZip(b, files, w)
+	}
 	if err != nil {
 		log.Printf("zip %s: %v", b, err) // incomplete: keep files
 		return
 	}
 	if consumesShared(r, b) {
+		names := make([]string, len(files))
+		for i, fi := range files {
+			names[i] = fi.Name
+		}
 		s.removeDelivered(b, names, r)
 	}
 }

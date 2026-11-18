@@ -24,6 +24,8 @@ Works with iPhone first, but any device with a browser (Android, another PC) wor
 
 Received files go to `~/WiFerry/Received` (Windows: `C:\Users\<you>\WiFerry\Received`).
 
+Every start is a fresh session: the shared list starts empty, and the PC page shows only files received in this session. Older received files stay in the folder.
+
 ## No router? Use a hotspot
 
 WiFerry needs no internet, only a shared network:

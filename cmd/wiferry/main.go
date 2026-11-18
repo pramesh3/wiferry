@@ -54,6 +54,12 @@ func run(port int, dir string, noBrowser, portExplicit bool) error {
 	if err != nil {
 		return fmt.Errorf("create folders: %w", err)
 	}
+	// Each run is a fresh session: Shared only holds copies, so start empty.
+	if err := st.Clear(store.Shared); err != nil {
+		return fmt.Errorf("clear shared folder: %w", err)
+	}
+	sessionStart := time.Now()
+
 	a, err := auth.New()
 	if err != nil {
 		return err
@@ -70,7 +76,7 @@ func run(port int, dir string, noBrowser, portExplicit bool) error {
 	}
 	port = ln.Addr().(*net.TCPAddr).Port
 
-	h := server.New(server.Config{Auth: a, Store: st, Port: port, ListIPs: netinfo.List})
+	h := server.New(server.Config{Auth: a, Store: st, Port: port, ListIPs: netinfo.List, SessionStart: sessionStart})
 	srv := &http.Server{Handler: h, ReadHeaderTimeout: 15 * time.Second}
 
 	printBanner(a.Token(), port, dir)

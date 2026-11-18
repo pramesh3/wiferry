@@ -140,9 +140,9 @@ func TestWriteZip(t *testing.T) {
 	s.Save(Shared, "a.txt", strings.NewReader("AAA"))
 	s.Save(Shared, "b.txt", strings.NewReader("BB"))
 	var buf bytes.Buffer
-	names, err := s.WriteZip(Shared, &buf)
-	if err != nil || len(names) != 2 {
-		t.Fatalf("names=%v err=%v", names, err)
+	files, _ := s.List(Shared)
+	if err := s.WriteZip(Shared, files, &buf); err != nil {
+		t.Fatal(err)
 	}
 	zr, err := zip.NewReader(bytes.NewReader(buf.Bytes()), int64(buf.Len()))
 	if err != nil {
@@ -157,5 +157,21 @@ func TestWriteZip(t *testing.T) {
 	}
 	if got["a.txt"] != "AAA" || got["b.txt"] != "BB" || len(got) != 2 {
 		t.Fatalf("zip = %v", got)
+	}
+}
+
+func TestClear(t *testing.T) {
+	s := newStore(t)
+	s.Save(Shared, "a.txt", strings.NewReader("x"))
+	os.WriteFile(filepath.Join(s.Dir(Shared), ".wiferry-123.part"), []byte("x"), 0o644)
+	s.Save(Received, "keep.txt", strings.NewReader("x"))
+	if err := s.Clear(Shared); err != nil {
+		t.Fatal(err)
+	}
+	if entries, _ := os.ReadDir(s.Dir(Shared)); len(entries) != 0 {
+		t.Fatalf("shared not empty: %v", entries)
+	}
+	if list, _ := s.List(Received); len(list) != 1 {
+		t.Fatal("received touched")
 	}
 }

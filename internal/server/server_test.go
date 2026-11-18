@@ -13,6 +13,7 @@ import (
 	"regexp"
 	"strings"
 	"testing"
+	"time"
 
 	"wiferry/internal/auth"
 	"wiferry/internal/netinfo"
@@ -36,6 +37,8 @@ func setup(t *testing.T) *fixture {
 		Auth:  auth.NewWithToken(token),
 		Store: st,
 		Port:  8642,
+		// Session started a minute ago; anything older is from a past run.
+		SessionStart: time.Now().Add(-time.Minute),
 		ListIPs: func() ([]netinfo.Addr, error) {
 			return []netinfo.Addr{{IP: "192.168.1.10", Iface: "wlan0"}}, nil
 		},
@@ -298,5 +301,27 @@ func TestHealthz(t *testing.T) {
 	r := httptest.NewRequest("GET", "/healthz", nil)
 	if rec := f.do(r); rec.Code != 200 {
 		t.Fatalf("code = %d", rec.Code)
+	}
+}
+
+func TestReceivedShowsOnlyThisSession(t *testing.T) {
+	f := setup(t)
+	f.store.Save(store.Received, "old.jpg", strings.NewReader("OLD"))
+	past := time.Now().Add(-time.Hour)
+	os.Chtimes(filepath.Join(f.store.Dir(store.Received), "old.jpg"), past, past)
+	f.store.Save(store.Received, "new.jpg", strings.NewReader("NEW"))
+
+	rec := f.do(hostReq("GET", "/api/files?box=received", nil))
+	if !strings.Contains(rec.Body.String(), "new.jpg") || strings.Contains(rec.Body.String(), "old.jpg") {
+		t.Fatalf("list = %s", rec.Body)
+	}
+	rec = f.do(hostReq("GET", "/api/zip/received", nil))
+	zr, err := zip.NewReader(bytes.NewReader(rec.Body.Bytes()), int64(rec.Body.Len()))
+	if err != nil || len(zr.File) != 1 || zr.File[0].Name != "new.jpg" {
+		t.Fatalf("zip err=%v", err)
+	}
+	// Old file is hidden, not deleted.
+	if _, err := os.Stat(filepath.Join(f.store.Dir(store.Received), "old.jpg")); err != nil {
+		t.Fatalf("old file removed: %v", err)
 	}
 }

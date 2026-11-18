@@ -160,26 +160,39 @@ func (s *Store) Delete(b Box, name string) error {
 	return os.Remove(p)
 }
 
-// WriteZip streams all files in a box as an uncompressed zip archive
-// (photos and videos are already compressed). It returns the names written
-// so callers can act on exactly those files once the transfer succeeds.
-func (s *Store) WriteZip(b Box, w io.Writer) ([]string, error) {
-	files, err := s.List(b)
-	if err != nil {
-		return nil, err
-	}
+// WriteZip streams the given files from a box as an uncompressed zip
+// archive (photos and videos are already compressed). files normally comes
+// from List, optionally filtered.
+func (s *Store) WriteZip(b Box, files []FileInfo, w io.Writer) error {
 	zw := zip.NewWriter(w)
-	names := make([]string, 0, len(files))
 	for _, fi := range files {
-		if err := addToZip(zw, filepath.Join(s.Dir(b), fi.Name), fi); err != nil {
-			return nil, err
+		p, err := s.path(b, fi.Name)
+		if err != nil {
+			return err
 		}
-		names = append(names, fi.Name)
+		if err := addToZip(zw, p, fi); err != nil {
+			return err
+		}
 	}
-	if err := zw.Close(); err != nil {
-		return nil, err
+	return zw.Close()
+}
+
+// Clear deletes every regular file in a box, including hidden leftovers such
+// as interrupted .part uploads. Subdirectories are left alone.
+func (s *Store) Clear(b Box) error {
+	entries, err := os.ReadDir(s.Dir(b))
+	if err != nil {
+		return err
 	}
-	return names, nil
+	for _, e := range entries {
+		if !e.Type().IsRegular() {
+			continue
+		}
+		if err := os.Remove(filepath.Join(s.Dir(b), e.Name())); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func addToZip(zw *zip.Writer, p string, fi FileInfo) error {
