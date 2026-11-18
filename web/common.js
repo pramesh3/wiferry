@@ -109,13 +109,14 @@ WF.uploadQueue = function (url, queueEl, hooks) {
     job.status.className = "status";
     job.status.textContent = "Sending…";
     try {
-      await WF.uploadOne(url, job.file, (p) => {
+      const result = await WF.uploadOne(url, job.file, (p) => {
         job.bar.style.width = Math.round(p * 100) + "%";
         job.status.textContent = "Sending… " + Math.round(p * 100) + "%";
       });
       job.bar.style.width = "100%";
       job.status.className = "status ok";
       job.status.textContent = "Done";
+      if (hooks && hooks.onDone) hooks.onDone(result, job.status.parentElement, job.status);
       if (hooks && hooks.clearDone) {
         const row = job.status.parentElement;
         setTimeout(() => row.remove(), hooks.clearDone);

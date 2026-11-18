@@ -385,3 +385,43 @@ func TestPhoneDownloadsAreGenericBinary(t *testing.T) {
 		t.Fatalf("zip content-type = %q", ct)
 	}
 }
+
+func pending(t *testing.T, f *fixture, ids string) []string {
+	t.Helper()
+	rec := f.do(clientReq("GET", "/api/sent?ids="+ids, nil))
+	if rec.Code != 200 {
+		t.Fatalf("sent code = %d %s", rec.Code, rec.Body)
+	}
+	var resp struct{ Pending []string }
+	json.Unmarshal(rec.Body.Bytes(), &resp)
+	return resp.Pending
+}
+
+func TestSentReceiptClearsWhenHostDownloads(t *testing.T) {
+	f := setup(t)
+	rec := upload(t, f, clientReq, "/api/upload", "IMG_1.png", "PNG", true)
+	var resp struct {
+		Saved []struct{ Name, ID string }
+	}
+	json.Unmarshal(rec.Body.Bytes(), &resp)
+	if len(resp.Saved) != 1 || len(resp.Saved[0].ID) < 16 {
+		t.Fatalf("upload resp = %s", rec.Body)
+	}
+	id := resp.Saved[0].ID
+
+	if got := pending(t, f, id); len(got) != 1 || got[0] != id {
+		t.Fatalf("before download pending = %v", got)
+	}
+	f.do(hostReq("GET", "/api/download/received/IMG_1.png", nil))
+	if got := pending(t, f, id); len(got) != 0 {
+		t.Fatalf("after download pending = %v", got)
+	}
+}
+
+func TestSentUnknownIDsAreNotPending(t *testing.T) {
+	f := setup(t)
+	f.store.Save(store.Received, "secret.png", strings.NewReader("x"))
+	if got := pending(t, f, "nope,secret.png"); len(got) != 0 {
+		t.Fatalf("pending = %v", got)
+	}
+}

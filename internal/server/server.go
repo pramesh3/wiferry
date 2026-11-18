@@ -2,6 +2,8 @@
 package server
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -13,6 +15,7 @@ import (
 	"os"
 	"path"
 	"strings"
+	"sync"
 	"syscall"
 	"time"
 
@@ -33,14 +36,22 @@ type Config struct {
 	SessionStart time.Time
 }
 
-type srv struct{ Config }
+type srv struct {
+	Config
+
+	// receipts maps an opaque id (given to the sending device) to the file it
+	// uploaded, so the device can see when the PC has picked the file up
+	// without being able to list or probe the Received folder.
+	mu       sync.Mutex
+	receipts map[string]string
+}
 
 // New returns the complete WiFerry HTTP handler.
 func New(cfg Config) http.Handler {
 	if cfg.ListIPs == nil {
 		cfg.ListIPs = netinfo.List
 	}
-	s := &srv{cfg}
+	s := &srv{Config: cfg, receipts: map[string]string{}}
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, r *http.Request) { io.WriteString(w, "ok") })
@@ -53,6 +64,7 @@ func New(cfg Config) http.Handler {
 	mux.HandleFunc("POST /api/upload", s.receive(store.Received))
 	mux.HandleFunc("POST /api/share", hostOnly(s.receive(store.Shared)))
 	mux.HandleFunc("GET /api/files", s.list)
+	mux.HandleFunc("GET /api/sent", s.sent)
 	mux.HandleFunc("GET /api/download/{box}/{name}", s.download)
 	mux.HandleFunc("GET /api/zip/{box}", s.zip)
 	mux.HandleFunc("DELETE /api/files/{box}/{name}", hostOnly(s.delete))
@@ -182,7 +194,11 @@ func (s *srv) receive(b store.Box) http.HandlerFunc {
 			http.Error(w, "expected multipart upload", http.StatusBadRequest)
 			return
 		}
-		saved := []store.FileInfo{}
+		type savedItem struct {
+			store.FileInfo
+			ID string `json:"id,omitempty"`
+		}
+		saved := []savedItem{}
 		for {
 			part, err := mr.NextPart()
 			if err == io.EOF {
@@ -208,10 +224,46 @@ func (s *srv) receive(b store.Box) http.HandlerFunc {
 				return
 			}
 			log.Printf("received %s (%d bytes) from %s", fi.Name, fi.Size, r.RemoteAddr)
-			saved = append(saved, fi)
+			item := savedItem{FileInfo: fi}
+			if b == store.Received {
+				item.ID = s.addReceipt(fi.Name)
+			}
+			saved = append(saved, item)
 		}
 		writeJSON(w, map[string]any{"saved": saved})
 	}
+}
+
+func (s *srv) addReceipt(name string) string {
+	buf := make([]byte, 12)
+	rand.Read(buf)
+	id := hex.EncodeToString(buf)
+	s.mu.Lock()
+	s.receipts[id] = name
+	s.mu.Unlock()
+	return id
+}
+
+// sent reports which of the caller's receipt ids still wait in Received.
+// Unknown ids, and files already downloaded or deleted, are not pending.
+func (s *srv) sent(w http.ResponseWriter, r *http.Request) {
+	pending := []string{}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	for _, id := range strings.Split(r.URL.Query().Get("ids"), ",") {
+		name, ok := s.receipts[id]
+		if !ok {
+			continue
+		}
+		f, _, err := s.Store.Open(store.Received, name)
+		if err != nil {
+			delete(s.receipts, id)
+			continue
+		}
+		f.Close()
+		pending = append(pending, id)
+	}
+	writeJSON(w, map[string]any{"pending": pending})
 }
 
 func (s *srv) list(w http.ResponseWriter, r *http.Request) {
