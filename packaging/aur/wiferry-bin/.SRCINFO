@@ -1,0 +1,18 @@
+pkgbase = wiferry-bin
+	pkgdesc = Send photos and files between your iPhone and PC over Wi-Fi. No app on the phone, no internet.
+	pkgver = 0.1.1
+	pkgrel = 1
+	url = https://github.com/pramesh3/wiferry
+	arch = x86_64
+	arch = aarch64
+	license = MIT
+	provides = wiferry
+	conflicts = wiferry
+	source = LICENSE-0.1.1::https://raw.githubusercontent.com/pramesh3/wiferry/v0.1.1/LICENSE
+	sha256sums = SKIP
+	source_x86_64 = wiferry-0.1.1-x86_64::https://github.com/pramesh3/wiferry/releases/download/v0.1.1/wiferry-linux-amd64
+	sha256sums_x86_64 = d5367e701110fe518daf5d0f6b422ec92f0bd7a0a77edf09b7a8abbe182a79be
+	source_aarch64 = wiferry-0.1.1-aarch64::https://github.com/pramesh3/wiferry/releases/download/v0.1.1/wiferry-linux-arm64
+	sha256sums_aarch64 = 9b21937ad28b1ef3ff0f0f2cec5866cb85711f5400f3178b280c75ac2e56013d
+
+pkgname = wiferry-bin

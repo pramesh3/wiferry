@@ -1,0 +1,30 @@
+{
+    "version": "0.1.1",
+    "description": "Send photos and files between your iPhone and PC over Wi-Fi. No app on the phone, no internet.",
+    "homepage": "https://github.com/pramesh3/wiferry",
+    "license": "MIT",
+    "architecture": {
+        "64bit": {
+            "url": "https://github.com/pramesh3/wiferry/releases/download/v0.1.1/wiferry-windows-amd64.exe#/wiferry.exe",
+            "hash": "54abedbb457634295dcf288ba0c361256084e953566b371fc05520e784bab792"
+        }
+    },
+    "bin": "wiferry.exe",
+    "shortcuts": [
+        [
+            "wiferry.exe",
+            "WiFerry"
+        ]
+    ],
+    "checkver": "github",
+    "autoupdate": {
+        "architecture": {
+            "64bit": {
+                "url": "https://github.com/pramesh3/wiferry/releases/download/v$version/wiferry-windows-amd64.exe#/wiferry.exe"
+            }
+        },
+        "hash": {
+            "url": "$baseurl/SHA256SUMS.txt"
+        }
+    }
+}

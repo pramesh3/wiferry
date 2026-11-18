@@ -1,0 +1,21 @@
+# Maintainer: pramesh3 <https://github.com/pramesh3>
+pkgname=wiferry-bin
+pkgver=0.1.1
+pkgrel=1
+pkgdesc="Send photos and files between your iPhone and PC over Wi-Fi. No app on the phone, no internet."
+arch=('x86_64' 'aarch64')
+url="https://github.com/pramesh3/wiferry"
+license=('MIT')
+provides=('wiferry')
+conflicts=('wiferry')
+source=("LICENSE-$pkgver::https://raw.githubusercontent.com/pramesh3/wiferry/v$pkgver/LICENSE")
+source_x86_64=("wiferry-$pkgver-x86_64::$url/releases/download/v$pkgver/wiferry-linux-amd64")
+source_aarch64=("wiferry-$pkgver-aarch64::$url/releases/download/v$pkgver/wiferry-linux-arm64")
+sha256sums=('SKIP')
+sha256sums_x86_64=('d5367e701110fe518daf5d0f6b422ec92f0bd7a0a77edf09b7a8abbe182a79be')
+sha256sums_aarch64=('9b21937ad28b1ef3ff0f0f2cec5866cb85711f5400f3178b280c75ac2e56013d')
+
+package() {
+  install -Dm755 "wiferry-$pkgver-$CARCH" "$pkgdir/usr/bin/wiferry"
+  install -Dm644 "LICENSE-$pkgver" "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}
