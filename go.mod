@@ -1,4 +1,4 @@
-module wiferry
+module github.com/pramesh3/wiferry
 
 go 1.22
 

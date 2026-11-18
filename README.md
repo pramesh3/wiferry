@@ -1,5 +1,9 @@
 # WiFerry
 
+[![CI](https://github.com/pramesh3/wiferry/actions/workflows/ci.yml/badge.svg)](https://github.com/pramesh3/wiferry/actions/workflows/ci.yml)
+[![Latest release](https://img.shields.io/github/v/release/pramesh3/wiferry)](https://github.com/pramesh3/wiferry/releases/latest)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 Move photos and files between your iPhone and a Linux or Windows PC over Wi-Fi.
 **No app to install on the phone. No internet. No cloud. One file on the PC.**
 
@@ -10,7 +14,7 @@ Works with iPhone first, but any device with a browser (Android, another PC) wor
 
 ## Quick start
 
-1. Download the file for your PC from Releases (or [build it](#build-from-source)):
+1. Download the file for your PC from [Releases](https://github.com/pramesh3/wiferry/releases/latest) (or [build it](#build-from-source)):
    - Windows: `wiferry-windows-amd64.exe`
    - Linux: `wiferry-linux-amd64` (or `-arm64` for ARM PCs like a Raspberry Pi)
 2. Start it:
@@ -87,6 +91,12 @@ If port 8642 is busy and `--port` wasn't given, a free port is chosen.
 ## Build from source
 
 Needs Go 1.22+.
+
+```
+go install github.com/pramesh3/wiferry/cmd/wiferry@latest
+```
+
+Or from a clone:
 
 ```
 make test        # vet + unit/integration tests

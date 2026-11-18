@@ -18,13 +18,13 @@ import (
 	"runtime"
 	"time"
 
-	"wiferry/internal/auth"
-	"wiferry/internal/install"
-	"wiferry/internal/netinfo"
-	"wiferry/internal/qr"
-	"wiferry/internal/server"
-	"wiferry/internal/store"
-	"wiferry/web"
+	"github.com/pramesh3/wiferry/internal/auth"
+	"github.com/pramesh3/wiferry/internal/install"
+	"github.com/pramesh3/wiferry/internal/netinfo"
+	"github.com/pramesh3/wiferry/internal/qr"
+	"github.com/pramesh3/wiferry/internal/server"
+	"github.com/pramesh3/wiferry/internal/store"
+	"github.com/pramesh3/wiferry/web"
 )
 
 const defaultPort = 8642

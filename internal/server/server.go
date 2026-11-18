@@ -19,12 +19,12 @@ import (
 	"syscall"
 	"time"
 
-	"wiferry/internal/auth"
-	"wiferry/internal/install"
-	"wiferry/internal/netinfo"
-	"wiferry/internal/qr"
-	"wiferry/internal/store"
-	"wiferry/web"
+	"github.com/pramesh3/wiferry/internal/auth"
+	"github.com/pramesh3/wiferry/internal/install"
+	"github.com/pramesh3/wiferry/internal/netinfo"
+	"github.com/pramesh3/wiferry/internal/qr"
+	"github.com/pramesh3/wiferry/internal/store"
+	"github.com/pramesh3/wiferry/web"
 )
 
 // Config holds the server's dependencies.
