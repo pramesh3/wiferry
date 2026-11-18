@@ -1,7 +1,7 @@
 // Package auth protects WiFerry with a per-launch secret token.
 //
-// LAN clients get the token from the QR code URL (?t=...), which is swapped
-// for an HttpOnly cookie. The host's own browser on loopback is trusted
+// LAN clients get the token from the QR code URL (?t=...), which is also
+// stored in an HttpOnly cookie for API calls. The host's own browser on loopback is trusted
 // without a token, provided the Host header is also local (guards against
 // DNS rebinding).
 package auth
@@ -83,10 +83,10 @@ func (a *Auth) Middleware(next http.Handler) http.Handler {
 				HttpOnly: true,
 				SameSite: http.SameSiteStrictMode,
 			})
-			q.Del("t")
-			u := *r.URL
-			u.RawQuery = q.Encode()
-			http.Redirect(w, r, u.RequestURI(), http.StatusSeeOther)
+			// Serve directly instead of redirecting to a clean URL: the token
+			// must stay in the address bar so "Open in Safari" from an in-app
+			// QR viewer (separate cookie jar) still connects.
+			next.ServeHTTP(w, r)
 			return
 		}
 		if c, err := r.Cookie(CookieName); err == nil && a.valid(c.Value) {

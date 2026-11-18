@@ -49,14 +49,13 @@ func TestNoTokenForbidden(t *testing.T) {
 	}
 }
 
-func TestQueryTokenSetsCookieAndRedirects(t *testing.T) {
+// The token stays in the address bar (no redirect) so "Open in Safari" from
+// an in-app viewer, which doesn't share cookies, still connects.
+func TestQueryTokenSetsCookieAndServesPage(t *testing.T) {
 	a := NewWithToken("secret")
 	rec := do(t, a, httptest.NewRequest("GET", "/?t=secret&x=1", nil))
-	if rec.Code != http.StatusSeeOther {
+	if rec.Code != http.StatusOK {
 		t.Fatalf("code = %d", rec.Code)
-	}
-	if loc := rec.Header().Get("Location"); loc != "/?x=1" {
-		t.Fatalf("location = %q", loc)
 	}
 	cookies := rec.Result().Cookies()
 	if len(cookies) != 1 || cookies[0].Name != CookieName || cookies[0].Value != "secret" {

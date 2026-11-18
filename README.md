@@ -17,7 +17,8 @@ Works with iPhone first, but any device with a browser (Android, another PC) wor
    - Linux: `chmod +x wiferry-linux-amd64 && ./wiferry-linux-amd64`
    - Windows: double-click the `.exe`. If Windows Firewall asks, allow it on **Private networks**.
 3. Put the phone on the **same Wi-Fi** as the PC (or connect the PC to the iPhone's Personal Hotspot).
-4. Scan the QR code with the iPhone camera and tap the link.
+4. Scan the QR code with the iPhone **Camera app** and tap the link (it opens Safari).
+   The Control Center **Code Scanner** opens a mini viewer that can't save downloads; tap its compass button to move to Safari.
 5. **Send files**: tap the button and choose Photo Library, Take Photo, or Choose File.
    **Receive files**: drop files on the PC page under "Share to devices", then tap them on the phone.
    Once a phone has fully downloaded a file, it is removed from the shared list (the copy in `~/WiFerry/Shared` is deleted; your originals are untouched).
